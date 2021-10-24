@@ -1,14 +1,6 @@
 multilabel_knn Package
 ======================
 
-:mod:`multilabel_knn` Package
------------------------------
-
-.. automodule:: multilabel_knn.__init__
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`binom_multilabel_graph` Module
 ------------------------------------
 
