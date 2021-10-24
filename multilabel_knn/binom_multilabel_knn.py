@@ -133,7 +133,6 @@ class binom_multilabel_kNN(kNN):
 
         p1 = (self.alpha + C1) / (self.alpha + self.beta + B1)
         p0 = (self.alpha + Call - C1) / (self.alpha + self.beta + Ball - B1)
-        print(p1, p0)
         return p1, p0
 
 

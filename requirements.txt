@@ -1,0 +1,4 @@
+faiss-cpu
+numba
+numpy
+scipy
