@@ -1,5 +1,4 @@
 # multilabel_knn
-[![Build Status](https://travis-ci.org/skojaku/multilabel_knn.svg?branch=main)](https://travis-ci.org/skojaku/multilabel_knn)
 [![Unit Test & Deploy](https://github.com/skojaku/multilabel_knn/actions/workflows/main.yml/badge.svg)](https://github.com/skojaku/multilabel_knn/actions/workflows/main.yml)
 
 
