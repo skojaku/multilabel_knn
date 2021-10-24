@@ -93,3 +93,6 @@ Test:
 ```bash
 python -m unittest tests/simple_test.py
 ```
+
+## Reference
+[1] Zhang, Min-Ling, and Zhi-Hua Zhou. 2007. “ML-KNN: A Lazy Learning Approach to Multi-Label Learning.” Pattern Recognition 40 (7): 2038–48.
