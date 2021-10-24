@@ -64,7 +64,6 @@ pip install multilabel_knn
 `multilabel_knn` uses [faiss library](https://github.com/facebookresearch/faiss), which has two versions, `faiss-cpu` and `faiss-gpu`.
 As the name stands, `faiss-gpu` can leverage GPUs, thureby faster if you have GPUs. `multilabel_knn` uses `faiss-cpu` by default to avoid unnecessary GPU-related troubles.
 But, if you have gpus compatible with the `faiss-gpu`, you can benefit the gpu accelarations by installing `faiss-gpu` by
-you can still leverage the GPUs (which is recommended if you have) by installing
 
 *with conda*:
 ```bash
