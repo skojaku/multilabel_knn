@@ -2,7 +2,7 @@
 [![Unit Test & Deploy](https://github.com/skojaku/multilabel_knn/actions/workflows/main.yml/badge.svg)](https://github.com/skojaku/multilabel_knn/actions/workflows/main.yml)
 
 
-`multilabel_knn` is a lightweight toolbox for the multilabel classifications based on the k-nearest neighbor graphs [[Doc](https://multilabel_knn.readthedocs.io/en/latest/)].
+`multilabel_knn` is a lightweight toolbox for the multilabel classifications based on the k-nearest neighbor algorithms [[Doc](https://multilabel_knn.readthedocs.io/en/latest/)].
 
 The following algorithms are implemented:
 
