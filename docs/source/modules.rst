@@ -1,7 +1,7 @@
-emlens
-======
+multilabel_knn
+==============
 
 .. toctree::
    :maxdepth: 4
 
-   emlens
+   multilabel_knn
