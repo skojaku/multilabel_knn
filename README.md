@@ -2,7 +2,7 @@
 [![Unit Test & Deploy](https://github.com/skojaku/multilabel_knn/actions/workflows/main.yml/badge.svg)](https://github.com/skojaku/multilabel_knn/actions/workflows/main.yml)
 
 
-`multilabel_knn` is a lightweight toolbox for the multilabel classifications based on the k-nearest neighbor graphs [[Doc](https://multilabel_knn.readthedocs.io/en/latest/)].
+`multilabel_knn` is a lightweight toolbox for the multilabel classifications based on the k-nearest neighbor algorithms [[Doc](https://multilabel_knn.readthedocs.io/en/latest/)].
 
 The following algorithms are implemented:
 
@@ -64,7 +64,6 @@ pip install multilabel_knn
 `multilabel_knn` uses [faiss library](https://github.com/facebookresearch/faiss), which has two versions, `faiss-cpu` and `faiss-gpu`.
 As the name stands, `faiss-gpu` can leverage GPUs, thureby faster if you have GPUs. `multilabel_knn` uses `faiss-cpu` by default to avoid unnecessary GPU-related troubles.
 But, if you have gpus compatible with the `faiss-gpu`, you can benefit the gpu accelarations by installing `faiss-gpu` by
-you can still leverage the GPUs (which is recommended if you have) by installing
 
 *with conda*:
 ```bash
