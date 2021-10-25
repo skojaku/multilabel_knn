@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath("./../.."))
 
 from unittest.mock import MagicMock
 
-MOCK_MODULES = ['faiss']
+MOCK_MODULES = ['faiss', "numba"]
 sys.modules.update((mod_name, MagicMock()) for mod_name in MOCK_MODULES)
 
 
