@@ -90,12 +90,12 @@ class binom_multilabel_graph(binom_multilabel_kNN):
 
         pred_positive = log_likelihood_1 > log_likelihood_0
         Ypred = sparse.csr_matrix(
-            (pred_positive, (samples, labels)), shape=(X.shape[0], self.n_labels)
+            (pred_positive, (samples, labels)), shape=(B.shape[0], self.n_labels)
         )
         if return_prob:
             prob = 1 / (1 + np.exp(log_likelihood_0 - log_likelihood_1))
             Yprob = sparse.csr_matrix(
-                (prob, (samples, labels)), shape=(X.shape[0], self.n_labels)
+                (prob, (samples, labels)), shape=(B.shape[0], self.n_labels)
             )
             return Ypred, Yprob
         else:
