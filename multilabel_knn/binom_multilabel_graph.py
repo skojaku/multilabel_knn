@@ -1,9 +1,3 @@
-"""Multilabel k-NN for binomial features.
-
-This is variant of the Multilabel k-NN for binomial feature.
-Instead of predicting the labels from the k-nearest neighbors, this
-classifiers predicts from the neighbors of a graph.
-"""
 import numpy as np
 from scipy import sparse
 from numba import njit
@@ -12,6 +6,13 @@ from .binom_multilabel_knn import binom_multilabel_kNN, _count_neighbors
 
 
 class binom_multilabel_graph(binom_multilabel_kNN):
+    """Multilabel k-NN for binomial features.
+
+    This is variant of the Multilabel k-NN for binomial feature.
+    Instead of predicting the labels from the k-nearest neighbors, this
+    classifiers predicts from the neighbors of a graph.
+    """
+
     def __init__(self, alpha=1, beta=1, prior="sample"):
         """
         :params n_neighbors: number of neighbors
@@ -55,7 +56,7 @@ class binom_multilabel_graph(binom_multilabel_kNN):
         # Calculate the posterior probabilities
         #
         # make knn graph
-        self.p1, self.p0 = self.estimate_binomial_params(A, Y)
+        self.p1, self.p0 = self._estimate_binomial_params(A, Y)
         return self
 
     def predict(self, B, return_prob=False):
@@ -100,7 +101,7 @@ class binom_multilabel_graph(binom_multilabel_kNN):
         else:
             return Ypred
 
-    def estimate_binomial_params(self, A, Y):
+    def _estimate_binomial_params(self, A, Y):
         """
         Calculate the conditional probability p for the binomial distribution.
 

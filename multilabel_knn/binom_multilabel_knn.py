@@ -1,22 +1,3 @@
-"""Multilabel k-NN for binomial features.
-
-This is a modified version of the Multilabel k-NN [1].
-
-The original multilabel k-nn calculates the posterior probability
-based on the empirical counts of events. An issue of this approach is that
-the empirical counts are crude if the number of samples and labels are large, where
-most rare events are unlikely to never occur.
-
-To address this problem, we estimte the count distribution using a parametric distribution, i.e., Binomial distribution.
-Because the binomial distribution can be estimated well even with a handful of samples,
-this modified multilabel k-NN can perform well in case the number of samples and labels are large.
-
-Reference:
-
-[1] Zhang, Min-Ling, and Zhi-Hua Zhou. 2007.
-    “ML-KNN: A Lazy Learning Approach to Multi-Label Learning.”
-    Pattern Recognition 40 (7): 2038–48.
-"""
 import numpy as np
 from scipy import sparse
 from numba import njit
@@ -25,6 +6,26 @@ from .knn import kNN
 
 
 class binom_multilabel_kNN(kNN):
+    """Multilabel k-NN for binomial features.
+
+    This is a modified version of the Multilabel k-NN [1].
+
+    The original multilabel k-nn calculates the posterior probability
+    based on the empirical counts of events. An issue of this approach is that
+    the empirical counts are crude if the number of samples and labels are large, where
+    most rare events never occur.
+
+    To address this problem, we estimte the count distribution using a parametric distribution, i.e., Binomial distribution.
+    Because the binomial distribution can be estimated well even with a handful of samples,
+    this modified multilabel k-NN can perform well in case the number of samples and labels are large.
+
+    Reference:
+
+    [1] Zhang, Min-Ling, and Zhi-Hua Zhou. 2007.
+        “ML-KNN: A Lazy Learning Approach to Multi-Label Learning.”
+        Pattern Recognition 40 (7): 2038–48.
+    """
+
     def __init__(
         self,
         k=5,
@@ -79,7 +80,7 @@ class binom_multilabel_kNN(kNN):
         self.index = self._make_faiss_index(X)
         A = self._make_knn_graph(X, self.k, exclude_selfloop=False)
         # A = self._make_knn_graph(X, self.k + 1, exclude_selfloop=True)
-        self.p1, self.p0 = self.estimate_binomial_params(A, Y)
+        self.p1, self.p0 = self._estimate_binomial_params(A, Y)
         return self
 
     def predict(self, X, return_prob=False):
@@ -125,7 +126,7 @@ class binom_multilabel_kNN(kNN):
         else:
             return Ypred
 
-    def estimate_binomial_params(self, A, Y):
+    def _estimate_binomial_params(self, A, Y):
         """
         Calculate the conditional probability p for the binomial distribution.
 

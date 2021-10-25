@@ -1,8 +1,3 @@
-"""Multilabel k-NN
-Zhang, Min-Ling, and Zhi-Hua Zhou. 2007.
-“ML-KNN: A Lazy Learning Approach to Multi-Label Learning.”
-Pattern Recognition 40 (7): 2038–48.
-"""
 import numpy as np
 from scipy import sparse
 from numba import njit
@@ -10,6 +5,12 @@ from .knn import kNN
 
 
 class multilabel_kNN(kNN):
+    """Multilabel k-NN
+    Zhang, Min-Ling, and Zhi-Hua Zhou. 2007.
+    “ML-KNN: A Lazy Learning Approach to Multi-Label Learning.”
+    Pattern Recognition 40 (7): 2038–48.
+    """
+
     def __init__(
         self, k=5, metric="euclidean", exact=True, s=1, prior="sample", **params
     ):
@@ -56,7 +57,7 @@ class multilabel_kNN(kNN):
         #
         self.C_1 = np.zeros((self.k + 1, self.n_labels))
         self.C_0 = np.zeros((self.k + 1, self.n_labels))
-        self.C1, self.C_0 = self.count_events(A, Y)
+        self.C1, self.C_0 = self._count_events(A, Y)
 
         # Calculate the probabilities
         self.marginal_1 = np.array(np.sum(self.C_1, axis=0)).reshape(-1)
@@ -107,7 +108,7 @@ class multilabel_kNN(kNN):
         else:
             return Ypred
 
-    def count_events(self, A, Y):
+    def _count_events(self, A, Y):
         """
         Calculate the conditional probability p for the binomial distribution.
 
