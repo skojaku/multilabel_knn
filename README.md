@@ -51,6 +51,29 @@ model.fit(A, Y) # A is the adjacency matrix of the graph for training. A[i,j] =1
 Y_pred = model.predict(B) # B is the adjacency matrix of the biparite network, where B[i,j] =1 if node i has a link to node j in the training graph.
 ```
 
+## Evaluation metrics
+
+`multilabel_knn` has several evaluation metrics for multilabel classifications:  
+
+```python
+from multilabel_knn import evaluations
+
+# Y: label matrix. Y[i,k]=1 if i has label k
+# Y_pred: predicted label. Y_pred[i,k] if i is predicted to have label k  
+evaluations.micro_f1score(Y, Y_pred) # micro f1
+
+evaluations.macro_f1score(Y, Y_pred) # macro f1
+
+evaluations.micro_hamming_loss(Y, Y_pred) # micro hamming loss
+
+evaluations.macro_hamming_loss(Y, Y_pred) # macro hamming loss
+
+# Y_score: probability or likelihood that i has label k
+evaluations.average_precision(Y, Y_score) # average precision
+
+evaluations.auc_roc(Y, Y_score) # roc-auc
+````
+
 
 ## Install
 
