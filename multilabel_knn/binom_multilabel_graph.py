@@ -58,7 +58,7 @@ class binom_multilabel_graph(binom_multilabel_kNN):
         self.p1, self.p0 = self.estimate_binomial_params(A, Y)
         return self
 
-    def predict(self, B):
+    def predict(self, B, return_prob=False):
         """predict labels for new samples
 
         :param B: adjacency matrix for a bipartite network. B[i,j] =1 if new node i has a link to the training node  if new node i has a link to the training node j.
@@ -88,12 +88,17 @@ class binom_multilabel_graph(binom_multilabel_kNN):
         )
 
         pred_positive = log_likelihood_1 > log_likelihood_0
-
         Ypred = sparse.csr_matrix(
-            (pred_positive, (samples, labels)), shape=(B.shape[0], self.n_labels)
+            (pred_positive, (samples, labels)), shape=(X.shape[0], self.n_labels)
         )
-
-        return Ypred
+        if return_prob:
+            prob = 1 / (1 + np.exp(log_likelihood_0 - log_likelihood_1))
+            Yprob = sparse.csr_matrix(
+                (prob, (samples, labels)), shape=(X.shape[0], self.n_labels)
+            )
+            return Ypred, Yprob
+        else:
+            return Ypred
 
     def estimate_binomial_params(self, A, Y):
         """
@@ -105,17 +110,15 @@ class binom_multilabel_graph(binom_multilabel_kNN):
         """
         n_nodes, n_labels = Y.shape[0], Y.shape[1]
 
-        n_neighbors = np.array(A.sum(axis=1)).reshape(-1)
-
         Y.sort_indices()
-        C1, Call = _count_neighbors(
+        C1, C0, B1, B0 = _count_neighbors(
             A.indptr, A.indices, Y.indptr, Y.indices, n_nodes, n_labels
         )
-        B1 = np.array((sparse.diags(n_neighbors) @ Y).sum(axis=0)).reshape(-1)
-        Ball = np.sum(n_neighbors)
+        # B1 = np.array((sparse.diags(n_neighbors) @ Y).sum(axis=0)).reshape(-1)
+        # Ball = np.sum(n_neighbors)
 
         p1 = (self.alpha + C1) / (self.alpha + self.beta + B1)
-        p0 = (self.alpha + Call - C1) / (self.alpha + self.beta + Ball - B1)
+        p0 = (self.alpha + C0) / (self.alpha + self.beta + B0)
         return p1, p0
 
     def _homogenize(self, A, Y=None):

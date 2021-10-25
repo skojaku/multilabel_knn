@@ -5,7 +5,7 @@ import faiss
 
 
 class kNN:
-    def __init__(self, k=5, metric="euclidean", exact=False, gpu_id=None):
+    def __init__(self, k=5, metric="euclidean", exact=True, gpu_id=None):
         self.k = k
         self.metric = metric
         self.gpu_id = gpu_id
@@ -29,7 +29,7 @@ class kNN:
         self.Y = Y
         return self
 
-    def predict(self, X):
+    def predict(self, X, return_prob=False):
         """Predict the class labels for the provided data
 
         :param X: data to predict
@@ -48,7 +48,11 @@ class kNN:
             (np.ones_like(cids), (np.arange(len(cids)), cids)),
             shape=(len(cids), self.Y.shape[1]),
         )
-        return Ypred
+        if return_prob:
+            C.data /= self.k
+            return Ypred, C
+        else:
+            return Ypred
 
     def _make_faiss_index(self, X):
         """Create an index for the provided data
@@ -60,6 +64,7 @@ class kNN:
         :rtype: faiss.Index
         """
         n_samples, n_features = X.shape[0], X.shape[1]
+        X = X.astype(np.float32)
 
         if n_samples < 1000:
             self.exact = True
@@ -122,6 +127,9 @@ class kNN:
         if exclude_selfloop:
             s = rows != indices
             rows, indices = rows[s], indices[s]
+
+        s = indices >= 0
+        rows, indices = rows[s], indices[s]
 
         A = sparse.csr_matrix(
             (np.ones_like(rows), (rows, indices)),

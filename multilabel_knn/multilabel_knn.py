@@ -10,8 +10,10 @@ from .knn import kNN
 
 
 class multilabel_kNN(kNN):
-    def __init__(self, k=5, metric="euclidean", exact=False, s=1, prior="sample"):
-        super().__init__(k=k, metric=metric, exact=exact)
+    def __init__(
+        self, k=5, metric="euclidean", exact=True, s=1, prior="sample", **params
+    ):
+        super().__init__(k=k, metric=metric, exact=exact, **params)
         self.s = s
         self.prior_type = prior
 
@@ -62,7 +64,7 @@ class multilabel_kNN(kNN):
 
         return self
 
-    def predict(self, X):
+    def predict(self, X, return_prob=False):
         """Predict class labels for samples in X.
 
         :param X: test data
@@ -83,23 +85,27 @@ class multilabel_kNN(kNN):
         count = count.astype(int)
 
         # Calculate the posterior probabilities
-        likelihood_1 = (
-            self.priors[labels]
-            * np.array((self.s + self.C_1[(count, labels)])).reshape(-1)
+        safelog = lambda x: np.log(np.maximum(x, 1e-12))
+        log_likelihood_1 = safelog(self.priors[labels]) + safelog(
+            np.array((self.s + self.C_1[(count, labels)])).reshape(-1)
             / (self.s * (self.k + 1) + self.marginal_1[labels])
         )
-        likelihood_0 = (
-            (1 - self.priors[labels])
-            * np.array((self.s + self.C_0[(count, labels)])).reshape(-1)
+        log_likelihood_0 = safelog(1 - self.priors[labels]) + safelog(
+            np.array((self.s + self.C_0[(count, labels)])).reshape(-1)
             / (self.s * (self.k + 1) + self.marginal_0[labels])
         )
-
-        pred_positive = likelihood_1 > likelihood_0
-
+        pred_positive = log_likelihood_1 > log_likelihood_0
         Ypred = sparse.csr_matrix(
             (pred_positive, (samples, labels)), shape=(X.shape[0], self.n_labels)
         )
-        return Ypred
+        if return_prob:
+            prob = 1 / (1 + np.exp(log_likelihood_0 - log_likelihood_1))
+            Yprob = sparse.csr_matrix(
+                (prob, (samples, labels)), shape=(X.shape[0], self.n_labels)
+            )
+            return Ypred, Yprob
+        else:
+            return Ypred
 
     def count_events(self, A, Y):
         """

@@ -26,7 +26,14 @@ from .knn import kNN
 
 class binom_multilabel_kNN(kNN):
     def __init__(
-        self, k=5, metric="euclidean", exact=False, alpha=1, beta=1, prior="sample"
+        self,
+        k=5,
+        metric="euclidean",
+        exact=True,
+        alpha=1,
+        beta=1,
+        prior="sample",
+        **params
     ):
         """
         :params n_neighbors: number of neighbors
@@ -34,7 +41,7 @@ class binom_multilabel_kNN(kNN):
         :params beta: hyperparameter for the prior
         :param k: [description], defaults to 5
         """
-        super().__init__(k=k, metric=metric, exact=exact)
+        super().__init__(k=k, metric=metric, exact=exact, **params)
         self.prior_type = prior
         self.alpha = alpha
         self.beta = beta
@@ -70,13 +77,12 @@ class binom_multilabel_kNN(kNN):
         #
         # make knn graph
         self.index = self._make_faiss_index(X)
-        A = self._make_knn_graph(X, self.k + 1, exclude_selfloop=True)
-
+        A = self._make_knn_graph(X, self.k, exclude_selfloop=False)
+        # A = self._make_knn_graph(X, self.k + 1, exclude_selfloop=True)
         self.p1, self.p0 = self.estimate_binomial_params(A, Y)
-
         return self
 
-    def predict(self, X):
+    def predict(self, X, return_prob=False):
         """Predict the target values for X.
 
         :param X: data to predict
@@ -107,12 +113,17 @@ class binom_multilabel_kNN(kNN):
         ) * safelog(1 - self.p0[labels])
 
         pred_positive = log_likelihood_1 > log_likelihood_0
-
         Ypred = sparse.csr_matrix(
             (pred_positive, (samples, labels)), shape=(X.shape[0], self.n_labels)
         )
-
-        return Ypred
+        if return_prob:
+            prob = 1 / (1 + np.exp(log_likelihood_0 - log_likelihood_1))
+            Yprob = sparse.csr_matrix(
+                (prob, (samples, labels)), shape=(X.shape[0], self.n_labels)
+            )
+            return Ypred, Yprob
+        else:
+            return Ypred
 
     def estimate_binomial_params(self, A, Y):
         """
@@ -125,14 +136,14 @@ class binom_multilabel_kNN(kNN):
         n_nodes, n_labels = Y.shape[0], Y.shape[1]
 
         Y.sort_indices()
-        C1, Call = _count_neighbors(
+        C1, C0, B1, B0 = _count_neighbors(
             A.indptr, A.indices, Y.indptr, Y.indices, n_nodes, n_labels
         )
-        B1 = self.k * np.array(Y.sum(axis=0)).reshape(-1)
-        Ball = self.k * n_nodes
+        # B1 = self.k * np.array(Y.sum(axis=0)).reshape(-1)
+        # Ball = self.k * n_nodes
 
         p1 = (self.alpha + C1) / (self.alpha + self.beta + B1)
-        p0 = (self.alpha + Call - C1) / (self.alpha + self.beta + Ball - B1)
+        p0 = (self.alpha + C0) / (self.alpha + self.beta + B0)
         return p1, p0
 
 
@@ -148,13 +159,26 @@ def _neighbors(indptr, indices_or_data, t):
 
 @njit(nogil=True)
 def _count_neighbors(A_indptr, A_indices, Y_indptr, Y_indices, n_nodes, n_labels):
-    C1 = np.zeros(n_labels, dtype=np.int32)
-    Call = np.zeros(n_labels, dtype=np.int32)
+    C1 = np.zeros(n_labels, dtype=np.int64)
+    C0 = np.zeros(n_labels, dtype=np.int64)
+    B1 = np.zeros(n_labels, dtype=np.int64)
+    B0 = np.zeros(n_labels, dtype=np.int64)
+    cnt1 = np.zeros(n_labels, dtype=np.int64)
+    cnt0 = np.zeros(n_labels, dtype=np.int64)
     for i in range(n_nodes):
         Y_neighbors_i = _neighbors(Y_indptr, Y_indices, i)
+        k = 0
         for j in _neighbors(A_indptr, A_indices, i):  #
+            k += 1
             for yj in _neighbors(Y_indptr, Y_indices, j):
                 if _isin_sorted(Y_neighbors_i, yj):
                     C1[yj] += 1
-                Call[yj] += 1
-    return C1, Call
+                    cnt1[yj] = 1
+                else:
+                    C0[yj] += 1
+                    cnt0[yj] = 1
+        B1 += cnt1 * k
+        B0 += cnt0 * k
+        cnt1 *= 0
+        cnt0 *= 0
+    return C1, C0, B1, B0
