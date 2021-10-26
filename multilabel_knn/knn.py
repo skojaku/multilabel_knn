@@ -25,7 +25,7 @@ class kNN:
         # make knn graph
         X = self._homogenize(X)
         self.n_indexed_samples = X.shape[0]
-        self.index = self._make_faiss_index(X)
+        self._make_faiss_index(X)
         self.Y = Y
         return self
 
@@ -64,46 +64,45 @@ class kNN:
         :rtype: faiss.Index
         """
         n_samples, n_features = X.shape[0], X.shape[1]
-        X = X.astype(np.float32)
-
+        X = X.astype("float32")
         if n_samples < 1000:
             self.exact = True
 
-        if self.metric == "euclidean":
-            if self.exact:
-                index = faiss.IndexFlatL2(n_features)
-            else:
-                quantiser = faiss.IndexFlatL2(n_features)
+        index = (
+            faiss.IndexFlatL2(n_features)
+            if self.metric == "euclidean"
+            else faiss.IndexFlatIP(n_features)
+        )
 
-                nlist = int(np.ceil(np.sqrt(n_samples)))
-                index = faiss.IndexIVFFlat(
-                    quantiser, n_features, nlist, faiss.METRIC_L2
-                )
-        elif self.metric == "cosine":
-            if self.exact:
-                index = faiss.IndexFlatIP(n_features)
-            else:
-                quantiser = faiss.IndexFlatIP(n_features)
-                nlist = int(np.ceil(np.sqrt(n_samples)))
-                index = faiss.IndexIVFFlat(
-                    quantiser, n_features, nlist, faiss.METRIC_INNER_PRODUCT
-                )
-        else:
-            raise NotImplementedError("does not support metric: {}".format(self.metric))
-
+        if not self.exact:
+            # code_size = 32
+            train_sample_num = np.minimum(100000, X.shape[0])
+            nlist = int(np.ceil(np.sqrt(train_sample_num)))
+            faiss_metric = (
+                faiss.METRIC_L2
+                if self.metric == "euclidean"
+                else faiss.METRIC_INNER_PRODUCT
+            )
+            # index = faiss.IndexIVFPQ(
+            #    index, n_features, nlist, code_size, 8, faiss_metric
+            # )
+            index = faiss.IndexIVFFlat(index, n_features, nlist, faiss_metric)
+            # index.nprobe = 5
         if self.gpu_id is not None:
             res = faiss.StandardGpuResources()
             index = faiss.index_cpu_to_gpu(res, self.gpu_id, index)
 
-        if self.exact:
-            index.add(X)
-        else:
-            index.train(X)
-            index.add(X)
-        return index
+        if not index.is_trained:
+            Xtrain = X[
+                np.random.choice(X.shape[0], train_sample_num, replace=False), :
+            ].copy(order="C")
+            index.train(Xtrain)
+
+        index.add(X)
+        self.index = index
 
     def _make_knn_graph(self, X, k, exclude_selfloop=True):
-        """ Construct the k-nearest neighbor graph
+        """Construct the k-nearest neighbor graph
 
         :param X: data to construct the graph
         :type X: numpy.ndarray
@@ -118,7 +117,7 @@ class kNN:
         n_samples, n_features = X.shape
 
         # create a list of k nearest neighbors for each vector
-        _, indices = self.index.search(X.astype(np.float32), k)
+        _, indices = self.index.search(X.astype("float32"), k)
 
         rows = np.arange(n_samples).reshape((-1, 1)) @ np.ones((1, k))
 
@@ -140,7 +139,10 @@ class kNN:
     def _homogenize(self, X, Y=None):
         if self.metric == "cosine":
             X = np.einsum("ij,i->ij", X, 1 / np.linalg.norm(X, axis=1))
-        X = X.astype(np.float32)
+        X = X.astype("float32")
+
+        if X.flags["C_CONTIGUOUS"]:
+            X = X.copy(order="C")
 
         if Y is not None:
             if sparse.issparse(Y):

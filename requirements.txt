@@ -1,4 +1,4 @@
-faiss-cpu
+faiss-gpu==1.6.5
 numba
 numpy
 scipy

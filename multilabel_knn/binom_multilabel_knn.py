@@ -3,8 +3,9 @@ from scipy import sparse
 from numba import njit
 from scipy import stats
 from .knn import kNN
+import faiss
 
-
+# class binom_multilabel_kNN:
 class binom_multilabel_kNN(kNN):
     """Multilabel k-NN for binomial features.
 
@@ -34,6 +35,7 @@ class binom_multilabel_kNN(kNN):
         alpha=1,
         beta=1,
         prior="sample",
+        gpu_id=None,
         **params
     ):
         """
@@ -42,7 +44,12 @@ class binom_multilabel_kNN(kNN):
         :params beta: hyperparameter for the prior
         :param k: [description], defaults to 5
         """
-        super().__init__(k=k, metric=metric, exact=exact, **params)
+        # super().__init__(k=k, metric=metric, exact=exact, **params)
+        self.k = k
+        self.metric = metric
+        self.gpu_id = gpu_id
+        self.exact = exact
+
         self.prior_type = prior
         self.alpha = alpha
         self.beta = beta
@@ -58,11 +65,18 @@ class binom_multilabel_kNN(kNN):
         :return: self
         :rtype: object
         """
+
         X, Y = self._homogenize(X, Y)
         self.Y = Y
 
         self.n_indexed_samples, self.n_labels = Y.shape[0], Y.shape[1]
 
+        #
+        # Calculate the posterior probabilities
+        #
+        # make knn graph
+        self._make_faiss_index(X)
+        A = self._make_knn_graph(X, int(self.k), exclude_selfloop=False)
         #
         # Calculate the prior probabilities
         #
@@ -72,14 +86,6 @@ class binom_multilabel_kNN(kNN):
             )
         elif self.prior_type == "uniform":
             self.priors = np.ones(self.n_labels) * 0.5
-
-        #
-        # Calculate the posterior probabilities
-        #
-        # make knn graph
-        self.index = self._make_faiss_index(X)
-        A = self._make_knn_graph(X, self.k, exclude_selfloop=False)
-        # A = self._make_knn_graph(X, self.k + 1, exclude_selfloop=True)
         self.p1, self.p0 = self._estimate_binomial_params(A, Y)
         return self
 
@@ -150,7 +156,11 @@ class binom_multilabel_kNN(kNN):
 
 @njit(nogil=True)
 def _isin_sorted(a, x):
-    return a[np.searchsorted(a, x)] == x
+    idx = np.searchsorted(a, x)
+    if idx >= len(a):
+        return False
+    else:
+        return a[idx] == x
 
 
 @njit(nogil=True)
