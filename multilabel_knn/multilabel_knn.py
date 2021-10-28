@@ -49,7 +49,7 @@ class multilabel_kNN(kNN):
         # Calculate the posterior probabilities
         #
         # make knn graph
-        self.index = self._make_faiss_index(X)
+        self._make_faiss_index(X)
         A = self._make_knn_graph(X, self.k + 1, exclude_selfloop=True)
 
         #
