@@ -90,22 +90,27 @@ Requirements: Python 3.7 or later
 pip install multilabel_knn
 ```
 
+
+### For users without GPUs
+
 `multilabel_knn` uses [faiss library](https://github.com/facebookresearch/faiss), which has two versions, `faiss-cpu` and `faiss-gpu`.
-As the name stands, `faiss-gpu` can leverage GPUs, thureby faster if you have GPUs. `multilabel_knn` uses `faiss-cpu` by default to avoid unnecessary GPU-related troubles.
-But, if you have gpus compatible with the `faiss-gpu`, you can benefit the gpu accelarations by installing `faiss-gpu` by
+As the name stands, `faiss-gpu` can leverage GPUs and make the algorithm substantially faster. `multilabel_knn` uses `faiss-gpu` by default, which means that this package may not work if you don't have GPUs. In this case, you need to install the CPU-version of the `faiss` library instead:
 
 *with conda*:
 ```bash
-conda install -c conda-forge faiss-gpu
+conda install -c conda-forge faiss-cpu
 ```
 
 or *with pip*:
 ```
-pip install faiss-gpu
+pip install faiss-cpu
 ```
 
-*Don't forget to pass `gpu_id` to the `init` argument to enable GPU*
+*Don't forget to set `gpu_id=None` to the `init` argument to disable GPU*
 
+```python
+model = mlk.multilabel_kNN(k=10, metric = "cosine", gpu_id = None)
+```
 
 ## Maintenance
 
