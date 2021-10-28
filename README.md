@@ -16,11 +16,17 @@ The following algorithms are implemented:
 **k-nearest neighbor algorithm (Predict a single label per sample)**
 
 ```python
+
+```
+
+```python
 import multilabel_knn as mlk
 model = mlk.kNN(k=10, metric = "cosine") #k: number of neighbors, metric: distance metric {"euclidean", "cosine"}
 model.fit(X, Y) # X :2d feature vectors. Y: label matrix, where Y[i,k] = 1 if i has label k.
 Y_pred = model.predict(X_test) # Y_pred[i,k] = 1 is i is predicted to have label k.
+Y_prob = model.predict(X_test, return_prob = True) # Y_prob[i,k] is the likelihood that i has label k.
 ```
+*This algorithm predicts one label per sample. The label is predicted by the majority vote, i.e., the most frequent label for the nearest neighbors.*
 
 **mutilabel kNN (Can predict multiple labels per sample) [1]**
 
@@ -29,6 +35,7 @@ import multilabel_knn as mlk
 model = mlk.multilabel_kNN(k=10, metric = "cosine")
 model.fit(X, Y)
 Y_pred = model.predict(X_test) 
+Y_prob = model.predict(X_test, return_prob = True)
 ```
 
 **Binomial mutilabel kNN (Can predict multiple labels per sample)**
@@ -38,6 +45,7 @@ import multilabel_knn as mlk
 model = mlk.binomial_multilabel_kNN(k=10, metric = "cosine")
 model.fit(X, Y) 
 Y_pred = model.predict(X_test) 
+Y_prob = model.predict(X_test, return_prob = True)
 ```
 *Binomial multilabel kNN is a mobidifed version of multilabel kNN. It can perform well for data with a large number of samples and labels. 
 See the docstring for details.*
@@ -49,6 +57,7 @@ import multilabel_knn as mlk
 model = mlk.binomial_multilabel_graph()
 model.fit(A, Y) # A is the adjacency matrix of the graph for training. A[i,j] =1 if node i has a link to node j. 
 Y_pred = model.predict(B) # B is the adjacency matrix of the biparite network, where B[i,j] =1 if node i has a link to node j in the training graph.
+Y_prob = model.predict(X_test, return_prob = True)
 ```
 
 ## Evaluation metrics
