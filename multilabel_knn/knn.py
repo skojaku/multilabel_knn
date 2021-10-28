@@ -5,7 +5,7 @@ import faiss
 
 
 class kNN:
-    def __init__(self, k=5, metric="euclidean", exact=True, gpu_id=None):
+    def __init__(self, k=5, metric="euclidean", exact=True, gpu_id=0):
         self.k = k
         self.metric = metric
         self.gpu_id = gpu_id
