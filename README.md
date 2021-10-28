@@ -15,9 +15,6 @@ The following algorithms are implemented:
 
 **k-nearest neighbor algorithm (Predict a single label per sample)**
 
-```python
-
-```
 
 ```python
 import multilabel_knn as mlk
