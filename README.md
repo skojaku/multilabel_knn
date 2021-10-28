@@ -7,8 +7,8 @@
 The following algorithms are implemented:
 
 - k-nearest neighbor classifier
-- [multilabel k-nearest neighbor classifier](https://linkinghub.elsevier.com/retrieve/pii/S0031320307000027)
-- Binomial multilabel k-nearest neighbor classifier
+- [multilabel k-nearest neighbor classifier](https://linkinghub.elsevier.com/retrieve/pii/S0031320307000027) (recommended for a small number of labels)
+- Binomial multilabel k-nearest neighbor classifier (recommended for large dataset with many labels)
 - Binomial multilabel graph neighbor classifer
 
 ## Usage
