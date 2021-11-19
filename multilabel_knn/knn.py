@@ -29,13 +29,16 @@ class kNN:
         self.labels = None
 
         if isinstance(Y, np.ndarray):
-            self.labels, label_ids = np.unique(Y, return_inverse = True)
+            self.labels, label_ids = np.unique(Y, return_inverse=True)
             n_labels = len(self.labels)
-            Y = sparse.csr_matrix((np.ones_like(Y), (np.arange(len(Y)), label_ids)), shape=(len(Y), n_labels))
+            Y = sparse.csr_matrix(
+                (np.ones_like(Y), (np.arange(len(Y)), label_ids)),
+                shape=(len(Y), n_labels),
+            )
         self.Y = Y
         return self
 
-    def predict(self, X, return_prob=False, return_ids = False):
+    def predict(self, X, return_prob=False, return_ids=False):
         """Predict the class labels for the provided data
 
         :param X: data to predict
@@ -52,9 +55,9 @@ class kNN:
         cids = np.array(np.argmax(C, axis=1)).reshape(-1)
 
         if return_ids:
-            C.data/=self.k
+            C.data /= self.k
             C = np.array(C[(np.arange(C.shape[0]), cids)]).reshape(-1)
-        
+
             if self.labels is not None:
                 Ypred = self.labels[cids]
             else:
