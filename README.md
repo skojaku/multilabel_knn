@@ -92,8 +92,8 @@ pip install multilabel_knn
 
 ### For users without GPUs
 
-Although the packages are tested in multiple environments, it is still possible
-that you come across issues related to `faiss`, the most common problem being related to GPUs. If you don't have GPUs and get some troubles, try install faiss-cpu instead:
+Although the package is tested in multiple environments, it is still possible
+that you come across issues related to `faiss`, the most common problem being the one related to GPUs. If you don't have GPUs and get some troubles, try install faiss-cpu instead:
 
 ```bash
 conda install -c conda-forge faiss-cpu
