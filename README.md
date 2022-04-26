@@ -31,7 +31,7 @@ Y_prob = model.predict(X_test, return_prob = True) # Y_prob[i,k] is the likeliho
 import multilabel_knn as mlk
 model = mlk.multilabel_kNN(k=10, metric = "cosine")
 model.fit(X, Y)
-Y_pred = model.predict(X_test) 
+Y_pred = model.predict(X_test)
 Y_prob = model.predict(X_test, return_prob = True)
 ```
 
@@ -40,11 +40,11 @@ Y_prob = model.predict(X_test, return_prob = True)
 ```python
 import multilabel_knn as mlk
 model = mlk.binomial_multilabel_kNN(k=10, metric = "cosine")
-model.fit(X, Y) 
-Y_pred = model.predict(X_test) 
+model.fit(X, Y)
+Y_pred = model.predict(X_test)
 Y_prob = model.predict(X_test, return_prob = True)
 ```
-*Binomial multilabel kNN is a mobidifed version of multilabel kNN. It can perform well for data with a large number of samples and labels. 
+*Binomial multilabel kNN is a mobidifed version of multilabel kNN. It can perform well for data with a large number of samples and labels.
 See the docstring for details.*
 
 **Binomial mutilabel graph (Take a graph as input. Can predict multiple labels per node)**
@@ -52,20 +52,20 @@ See the docstring for details.*
 ```python
 import multilabel_knn as mlk
 model = mlk.binomial_multilabel_graph()
-model.fit(A, Y) # A is the adjacency matrix of the graph for training. A[i,j] =1 if node i has a link to node j. 
+model.fit(A, Y) # A is the adjacency matrix of the graph for training. A[i,j] =1 if node i has a link to node j.
 Y_pred = model.predict(B) # B is the adjacency matrix of the biparite network, where B[i,j] =1 if node i has a link to node j in the training graph.
 Y_prob = model.predict(X_test, return_prob = True)
 ```
 
 ## Evaluation metrics
 
-`multilabel_knn` has several evaluation metrics for multilabel classifications:  
+`multilabel_knn` has several evaluation metrics for multilabel classifications:
 
 ```python
 from multilabel_knn import evaluations
 
 # Y: label matrix. Y[i,k]=1 if i has label k
-# Y_pred: predicted label. Y_pred[i,k] if i is predicted to have label k  
+# Y_pred: predicted label. Y_pred[i,k] if i is predicted to have label k
 evaluations.micro_f1score(Y, Y_pred) # micro f1
 
 evaluations.macro_f1score(Y, Y_pred) # macro f1
@@ -90,13 +90,11 @@ Requirements: Python 3.7 or later
 pip install multilabel_knn
 ```
 
-
 ### For users without GPUs
 
-`multilabel_knn` uses [faiss library](https://github.com/facebookresearch/faiss), which has two versions, `faiss-cpu` and `faiss-gpu`.
-As the name stands, `faiss-gpu` can leverage GPUs and make the algorithm substantially faster. `multilabel_knn` uses `faiss-gpu` by default, which means that this package may not work if you don't have GPUs. In this case, you need to install the CPU-version of the `faiss` library instead:
+Although the package is tested in multiple environments, it is still possible
+that you come across issues related to `faiss`, the most common problem being the one related to GPUs. If you don't have GPUs and get some troubles, try install faiss-cpu instead:
 
-*with conda*:
 ```bash
 conda install -c conda-forge faiss-cpu
 ```
@@ -106,10 +104,12 @@ or *with pip*:
 pip install faiss-cpu
 ```
 
-*Don't forget to set `gpu_id=None` to the `init` argument to disable GPU*
+### For users with GPUs
+
+`multilabel_knn` uses only CPUs by default but if you have GPUs, congratulations! You can get a substantial speed up!! To enable the GPU, specify `gpu_id` in the input argument. For example:
 
 ```python
-model = mlk.multilabel_kNN(k=10, metric = "cosine", gpu_id = None)
+model = mlk.binomial_multilabel_kNN(k=10, metric = "cosine", gpu_id="cuda:0") # or gpu_id=0 depending on the system
 ```
 
 ## Maintenance

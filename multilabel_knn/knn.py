@@ -5,7 +5,7 @@ import faiss
 
 
 class kNN:
-    def __init__(self, k=5, metric="euclidean", exact=True, gpu_id=0):
+    def __init__(self, k=5, metric="euclidean", exact=True, gpu_id=None):
         self.k = k
         self.metric = metric
         self.gpu_id = gpu_id
@@ -109,6 +109,7 @@ class kNN:
             # )
             index = faiss.IndexIVFFlat(index, n_features, nlist, faiss_metric)
             # index.nprobe = 5
+
         if self.gpu_id is not None:
             res = faiss.StandardGpuResources()
             index = faiss.index_cpu_to_gpu(res, self.gpu_id, index)
