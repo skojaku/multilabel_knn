@@ -1,4 +1,4 @@
-name: authordynamics 
+name: emlens 
 channels:
   - conda-forge
   - defaults

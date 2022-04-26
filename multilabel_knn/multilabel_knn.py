@@ -2,6 +2,7 @@ import numpy as np
 from scipy import sparse
 from numba import njit
 from .knn import kNN
+from scipy.special import expit
 
 
 class multilabel_kNN(kNN):
@@ -100,7 +101,7 @@ class multilabel_kNN(kNN):
             (pred_positive, (samples, labels)), shape=(X.shape[0], self.n_labels)
         )
         if return_prob:
-            prob = 1 / (1 + np.exp(log_likelihood_0 - log_likelihood_1))
+            prob = expit(-log_likelihood_0 + log_likelihood_1)
             Yprob = sparse.csr_matrix(
                 (prob, (samples, labels)), shape=(X.shape[0], self.n_labels)
             )
