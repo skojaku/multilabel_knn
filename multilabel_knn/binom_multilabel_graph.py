@@ -3,6 +3,7 @@ from scipy import sparse
 from numba import njit
 from scipy import stats
 from .binom_multilabel_knn import binom_multilabel_kNN, _count_neighbors
+from scipy.special import expit
 
 
 class binom_multilabel_graph(binom_multilabel_kNN):
@@ -93,7 +94,7 @@ class binom_multilabel_graph(binom_multilabel_kNN):
             (pred_positive, (samples, labels)), shape=(B.shape[0], self.n_labels)
         )
         if return_prob:
-            prob = 1 / (1 + np.exp(log_likelihood_0 - log_likelihood_1))
+            prob = expit(-log_likelihood_0 + log_likelihood_1)
             Yprob = sparse.csr_matrix(
                 (prob, (samples, labels)), shape=(B.shape[0], self.n_labels)
             )

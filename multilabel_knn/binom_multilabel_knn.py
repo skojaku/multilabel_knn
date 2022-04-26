@@ -4,6 +4,7 @@ from numba import njit
 from scipy import stats
 from .knn import kNN
 import faiss
+from scipy.special import expit
 
 # class binom_multilabel_kNN:
 class binom_multilabel_kNN(kNN):
@@ -124,7 +125,7 @@ class binom_multilabel_kNN(kNN):
             (pred_positive, (samples, labels)), shape=(X.shape[0], self.n_labels)
         )
         if return_prob:
-            prob = 1 / (1 + np.exp(log_likelihood_0 - log_likelihood_1))
+            prob = expit(-log_likelihood_0 + log_likelihood_1)
             Yprob = sparse.csr_matrix(
                 (prob, (samples, labels)), shape=(X.shape[0], self.n_labels)
             )
