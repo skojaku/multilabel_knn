@@ -122,7 +122,7 @@ class kNN:
         index.add(X)
         self.index = index
 
-    def _make_knn_graph(self, X, k, exclude_selfloop=True):
+    def _make_knn_graph(self, X, k, exclude_selfloop=True, weighted=False):
         """Construct the k-nearest neighbor graph
 
         :param X: data to construct the graph
@@ -138,21 +138,24 @@ class kNN:
         n_samples, n_features = X.shape
 
         # create a list of k nearest neighbors for each vector
-        _, indices = self.index.search(X.astype("float32"), k)
+        dist, indices = self.index.search(X.astype("float32"), k)
 
         rows = np.arange(n_samples).reshape((-1, 1)) @ np.ones((1, k))
 
         # create the knn graph
-        rows, indices = rows.ravel(), indices.ravel()
+        rows, indices, dist = rows.ravel(), indices.ravel(), dist.ravel()
         if exclude_selfloop:
             s = rows != indices
-            rows, indices = rows[s], indices[s]
+            rows, indices, dist = rows[s], indices[s], dist[s]
 
         s = indices >= 0
-        rows, indices = rows[s], indices[s]
+        rows, indices, dist = rows[s], indices[s], dist[s]
+
+        if weighted is False:
+            dist = dist * 0 + 1
 
         A = sparse.csr_matrix(
-            (np.ones_like(rows), (rows, indices)),
+            (dist, (rows, indices)),
             shape=(n_samples, self.n_indexed_samples),
         )
         return A
