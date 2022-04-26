@@ -78,7 +78,7 @@ class multilabel_kNN(kNN):
         X = self._homogenize(X)
 
         if self.metric == "cosine":
-            X = np.einsum("ij,i->ij", X, 1 / np.linalg.norm(X, axis=1))
+            X = np.einsum("ij,i->ij", X, 1 / np.maximum(np.linalg.norm(X, axis=1), 1e-32))
 
         A = self._make_knn_graph(X, self.k, exclude_selfloop=False)
 

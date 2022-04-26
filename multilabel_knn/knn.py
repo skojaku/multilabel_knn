@@ -163,7 +163,7 @@ class kNN:
 
     def _homogenize(self, X, Y=None):
         if self.metric == "cosine":
-            X = np.einsum("ij,i->ij", X, 1 / np.linalg.norm(X, axis=1))
+            X = np.einsum("ij,i->ij", X, 1 / np.maximum(np.linalg.norm(X, axis=1), 1e-32))
         X = X.astype("float32")
 
         if X.flags["C_CONTIGUOUS"]:
