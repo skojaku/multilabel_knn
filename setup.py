@@ -27,7 +27,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),
-    install_requires=load_requires_from_file("requirements.txt"),
+    #install_requires=load_requires_from_file("requirements.txt"),
     include_package_data=True,
     zip_safe=False,
     license="MIT",

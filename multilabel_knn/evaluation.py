@@ -1,9 +1,16 @@
+# -*- coding: utf-8 -*-
+# @Author: Sadamori Kojaku
+# @Date:   2023-02-07 21:17:37
+# @Last Modified by:   Sadamori Kojaku
+# @Last Modified time: 2023-02-12 22:00:46
 from scipy import sparse
 import numpy as np
 from sklearn import metrics
 
 
 def micro_f1score(Y_test, Y_pred):
+    Y_test.data = Y_test.data * 0 + 1
+    Y_pred.data = Y_pred.data * 0 + 1
     true_pos_num = Y_pred.multiply(Y_test).sum()
     pos_num = Y_pred.sum()
     true_num = Y_test.sum()
@@ -18,6 +25,8 @@ def micro_f1score(Y_test, Y_pred):
 
 
 def macro_f1score(Y_test, Y_pred):
+    Y_test.data = Y_test.data * 0 + 1
+    Y_pred.data = Y_pred.data * 0 + 1
     true_pos_num = np.array(Y_pred.multiply(Y_test).sum(axis=0)).reshape(-1)
     pos_num = np.array(Y_pred.sum(axis=0)).reshape(-1)
     true_num = np.array(Y_test.sum(axis=0)).reshape(-1)
